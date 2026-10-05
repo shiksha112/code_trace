@@ -1,0 +1,1025 @@
+/* ==========================================================================
+   CodeTrace — home.css
+   Sections of the landing page. Breakpoint overrides live in responsive.css.
+   The "trace" block (section 3) is the execution-preview component and is
+   written to be reused by the Playground page.
+   ========================================================================== */
+
+/* ---------- 1. Section scaffolding ---------- */
+.section {
+  padding-block: var(--section-y);
+}
+
+/* When the previous section already provides bottom space */
+.section--tight-top {
+  padding-top: 0;
+}
+
+.section--band {
+  background: var(--surface);
+  border-block: 1px solid var(--border);
+}
+
+.section-head {
+  max-width: 680px;
+  margin: 0 auto clamp(36px, 5vw, 56px);
+  text-align: center;
+}
+
+.section-head .lede {
+  margin-top: 14px;
+}
+
+.icon-tile {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ---------- 2. Hero ---------- */
+.hero {
+  padding-block: clamp(48px, 7vw, 96px) clamp(64px, 8vw, 112px);
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  align-items: center;
+  gap: clamp(40px, 5vw, 72px);
+}
+
+.badge {
+  display: inline-block;
+  margin-bottom: 24px;
+  padding: 6px 12px;
+  border: 1px solid var(--accent-line);
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .badge {
+  color: var(--accent-strong);
+}
+
+.hero-line {
+  display: block;
+}
+
+.hero-line--muted {
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+.hero-copy .lede {
+  max-width: 54ch;
+  margin-top: 24px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.hero-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 0;
+  margin-top: 28px;
+  color: var(--text-2);
+  font-size: 0.875rem;
+}
+
+.hero-stack li:not(:last-child)::after {
+  content: "•";
+  margin-inline: 10px;
+  color: var(--border-strong);
+}
+
+.hero-visual {
+  position: relative;
+  padding-top: 34px; /* room for the floating step label */
+}
+
+.step-badge {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.step-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+/* ---------- 3. Execution preview component (".trace") ---------- */
+
+/* The mount is a size container so the preview adapts to the space it is
+   given (hero column, full-width section, phone) rather than the viewport. */
+.trace-host {
+  container-type: inline-size;
+  container-name: trace-host;
+}
+
+.trace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+  grid-template-areas:
+    "code state"
+    "viz viz"
+    "controls controls";
+  gap: 1px; /* panes sit on the border colour, so gaps read as hairlines */
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+.trace-pane,
+.trace-controls {
+  min-width: 0;
+  background: var(--surface);
+}
+
+.trace-pane--code {
+  grid-area: code;
+}
+
+.trace-pane--viz {
+  grid-area: viz;
+  display: flex;
+  flex-direction: column;
+}
+
+.trace-pane--state {
+  grid-area: state;
+}
+
+.trace-controls {
+  grid-area: controls;
+}
+
+.pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.pane-title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pane-meta {
+  color: var(--text-3);
+  font-size: 0.6875rem;
+}
+
+/* Code */
+.code {
+  margin: 0;
+  padding: 8px 0 10px;
+  overflow-x: auto;
+  counter-reset: line;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 26px;
+  background: var(--surface);
+}
+
+.code-line {
+  position: relative;
+  min-width: 100%;
+  width: max-content;
+  padding: 0 36px 0 54px;
+  border-left: 3px solid transparent;
+  white-space: pre;
+  counter-increment: line;
+  transition: background-color var(--t-fast) var(--ease);
+}
+
+.code-line::before {
+  content: counter(line);
+  position: absolute;
+  left: 0;
+  width: 38px;
+  text-align: right;
+  color: var(--text-3);
+  font-size: 0.6875rem;
+}
+
+.code-line.is-current {
+  background: var(--accent-soft);
+  border-left-color: var(--accent);
+}
+
+.code-line.is-current::before {
+  color: var(--accent);
+}
+
+/* The one quiet moving thing: the line marker breathes */
+.code-line.is-current::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: line-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes line-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.tk-kw {
+  color: var(--tk-kw);
+  font-weight: 500;
+}
+
+.tk-num {
+  color: var(--tk-num);
+}
+
+/* Variables (also used by the "Execution State" card) */
+.vars {
+  padding: 8px 0;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.var-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 16px;
+  border-left: 3px solid transparent;
+}
+
+.var-row dt {
+  color: var(--text-2);
+}
+
+.var-row dd {
+  margin: 0;
+  min-width: 2ch;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.var-row dd.is-empty {
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.var-row.is-changed {
+  border-left-color: var(--accent);
+  animation: var-flash 900ms var(--ease) 1;
+}
+
+.var-row.is-changed dd {
+  color: var(--accent);
+}
+
+[data-theme="dark"] .var-row.is-changed dd {
+  color: var(--accent-strong);
+}
+
+@keyframes var-flash {
+  0% {
+    background: var(--accent-soft);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+/* Array + pointers */
+.viz-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px 16px 16px;
+}
+
+.array {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cell-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 46px;
+}
+
+.cell {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: opacity var(--t-base) var(--ease), border-color var(--t-base) var(--ease),
+    background-color var(--t-base) var(--ease), color var(--t-base) var(--ease);
+}
+
+.cell.is-current {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+[data-theme="dark"] .cell.is-current {
+  color: var(--accent-strong);
+}
+
+.cell.is-found {
+  border-color: var(--success);
+  background: var(--success-soft);
+  color: var(--text);
+}
+
+.cell.is-dim {
+  opacity: 0.36;
+}
+
+.cell-index {
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+}
+
+.cell-marks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 1.25rem;
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--surface-muted);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.mark i {
+  font-style: normal;
+}
+
+.mark--mid {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .mark--mid {
+  color: var(--accent-strong);
+}
+
+.mark--found {
+  background: var(--success-soft);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.trace-note {
+  min-height: 2.9em; /* reserve two lines so the card never jumps */
+  text-align: center;
+  color: var(--text-2);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+/* Playback controls */
+.trace-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.ctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: border-color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease),
+    opacity var(--t-fast) var(--ease);
+}
+
+.ctl .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.ctl:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.ctl:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ctl--play {
+  min-width: 84px;
+  justify-content: center;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.ctl--play:hover:not(:disabled) {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: var(--on-accent);
+}
+
+.scrubber {
+  flex: 1;
+  min-width: 80px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.step-count {
+  min-width: 84px;
+  text-align: right;
+  color: var(--text-2);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Wide variant: Code | Visualization | Execution state */
+.trace--wide {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.1fr) minmax(0, 0.7fr);
+  grid-template-areas:
+    "code viz state"
+    "controls controls controls";
+}
+
+.trace--wide .code {
+  font-size: 0.84rem;
+  line-height: 30px;
+  padding-block: 12px;
+}
+
+.trace--wide .viz-body {
+  padding: 32px 20px 20px;
+}
+
+.trace--wide .cell,
+.trace--wide .cell-wrap {
+  width: 52px;
+}
+
+.trace--wide .cell {
+  height: 52px;
+  font-size: 1.0625rem;
+}
+
+.trace--wide .var-row {
+  padding-block: 10px;
+}
+
+.trace--wide .trace-controls {
+  padding-inline: 20px;
+}
+
+/* Adapt to available width, not viewport width */
+@container trace-host (max-width: 880px) {
+  .trace--wide {
+    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+    grid-template-areas:
+      "code state"
+      "viz viz"
+      "controls controls";
+  }
+
+  .trace--wide .code {
+    font-size: 0.78rem;
+    line-height: 26px;
+    padding-block: 8px 10px;
+  }
+
+  .trace--wide .viz-body {
+    padding: 24px 16px 16px;
+  }
+
+  .trace--wide .cell,
+  .trace--wide .cell-wrap {
+    width: 46px;
+  }
+
+  .trace--wide .cell {
+    height: 46px;
+    font-size: 0.9375rem;
+  }
+
+  .trace--wide .var-row {
+    padding-block: 7px;
+  }
+}
+
+@container trace-host (max-width: 480px) {
+  .trace,
+  .trace--wide {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "code"
+      "state"
+      "viz"
+      "controls";
+  }
+
+  .trace .vars {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trace .cell,
+  .trace .cell-wrap {
+    width: 42px;
+  }
+
+  .trace .cell {
+    height: 42px;
+  }
+
+  .trace .array {
+    gap: 6px;
+  }
+
+  .trace-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ctl-label {
+    display: none;
+  }
+
+  .ctl {
+    padding-inline: 10px;
+  }
+
+  .ctl--play .ctl-label {
+    display: inline;
+  }
+
+  .step-count {
+    margin-left: auto;
+    min-width: 0;
+  }
+
+  .scrubber {
+    flex: 1 1 100%;
+    order: 5;
+  }
+}
+
+/* ---------- 4. How it works ---------- */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.step-card {
+  position: relative;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);
+}
+
+.step-card:hover {
+  border-color: var(--accent-line);
+  box-shadow: var(--shadow-md);
+}
+
+.step-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.step-num {
+  color: var(--text-3);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.step-card h3 {
+  margin-bottom: 8px;
+}
+
+.step-card p {
+  color: var(--text-2);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* 01 → 02 → 03 → 04 */
+.step-card:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  top: 34px;
+  right: -24px;
+  width: 24px;
+  text-align: center;
+  color: var(--border-strong);
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  line-height: 1;
+}
+
+/* ---------- 5. Visualization cards ---------- */
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.viz-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);
+}
+
+.viz-card:hover {
+  border-color: var(--accent-line);
+  box-shadow: var(--shadow-md);
+}
+
+.viz-stage {
+  display: grid;
+  place-items: center;
+  min-height: 188px;
+  padding: 20px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+
+.viz-card-body {
+  padding: 20px 22px 24px;
+}
+
+.viz-card-body h3 {
+  margin-bottom: 6px;
+}
+
+.viz-card-body p {
+  color: var(--text-2);
+  font-size: 0.9375rem;
+}
+
+/* Smaller array inside a card */
+.viz-card .array {
+  gap: 5px;
+}
+
+.viz-card .cell-wrap,
+.viz-card .cell {
+  width: 36px;
+}
+
+.viz-card .cell {
+  height: 36px;
+  font-size: 0.8125rem;
+}
+
+.viz-card .cell-marks {
+  min-height: 1.5rem;
+}
+
+.viz-svg {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  overflow: visible;
+}
+
+.viz-edges line {
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.viz-node circle {
+  fill: var(--surface);
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+
+.viz-node text {
+  fill: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.viz-node.is-visited circle {
+  fill: var(--success-soft);
+  stroke: var(--success);
+}
+
+.viz-node.is-active circle {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.vars--card {
+  width: 100%;
+  max-width: 190px;
+  padding: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.vars--card .var-row {
+  padding-block: 5px;
+}
+
+/* In the card the highlighted row is static (no flash) */
+.vars--card .var-row.is-changed {
+  animation: none;
+  background: var(--accent-soft);
+}
+
+/* ---------- 6. Why CodeTrace ---------- */
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(32px, 5vw, 64px);
+}
+
+.why-item {
+  padding-top: 28px;
+  border-top: 1px solid var(--border-strong);
+}
+
+.why-item .icon-tile {
+  margin-bottom: 18px;
+}
+
+.why-item h3 {
+  margin-bottom: 8px;
+}
+
+.why-item p {
+  max-width: 36ch;
+  color: var(--text-2);
+}
+
+/* ---------- 7. Large product preview ---------- */
+.preview-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+.app-window {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.app-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-muted);
+  font-size: 0.75rem;
+}
+
+.app-tab {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.app-input {
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+.app-input-label {
+  margin-right: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .app-input-label {
+  color: var(--accent-strong);
+}
+
+/* The window supplies the frame, so the trace drops its own */
+.app-window .trace {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ---------- 8. Final CTA ---------- */
+.cta-panel {
+  padding: clamp(44px, 7vw, 88px) clamp(24px, 5vw, 64px);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-lg);
+  background: var(--accent-soft);
+  text-align: center;
+}
+
+.cta-panel h2 {
+  max-width: 18ch;
+  margin-inline: auto;
+  font-size: clamp(2rem, 4.4vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+
+.cta-panel .lede {
+  margin-top: 16px;
+}
+
+.cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 28px;
+  margin-top: 32px;
+}
+
+.cta-link {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: 1px solid var(--border-strong);
+  padding-bottom: 2px;
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+
+.cta-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------- 9. Reveal on scroll (only when JS is running) ---------- */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 500ms var(--ease), transform 500ms var(--ease);
+}
+
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .code-line.is-current::after {
+    animation: none;
+  }
+}
+
+
+/* ---------- Home architecture update ---------- */
+.hero-grid--single { grid-template-columns: minmax(0, 1fr); text-align: center; }
+.hero-grid--single .lede { margin-inline: auto; }
+.hero-grid--single .hero-actions { justify-content: center; }
+
+.how-line { margin-top: 12px; color: var(--text-2); font-size: 0.9375rem; letter-spacing: 0.02em; }
+.steps--five { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; }
+.steps--five .step-card { padding: 20px; }
+.steps--five .step-card-top { margin-bottom: 16px; }
+.steps--five .step-card:not(:last-child)::after { right: -20px; width: 20px; }
+@media (max-width: 1100px) {
+  .steps--five { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .steps--five .step-card:not(:last-child)::after { display: none; }
+}
+
+.preview-cta { display: flex; justify-content: center; margin-top: 32px; }
+
+.soon-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.soon-list li {
+  padding: 6px 12px; border: 1px dashed var(--border-strong); border-radius: 8px;
+  color: var(--text-2); font-size: 0.8125rem;
+}
