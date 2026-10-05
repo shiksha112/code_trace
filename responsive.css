@@ -1,0 +1,325 @@
+/* ==========================================================================
+   CodeTrace — responsive.css
+   Breakpoints: 1200 · 992 · 768 · 560 · 380
+   Desktop-first. The execution preview adapts through container queries
+   (see home.css), so it does not need rules here.
+   ========================================================================== */
+
+/* ---------- ≤ 1200px: small desktop ---------- */
+@media (max-width: 1200px) {
+  .steps,
+  .viz-grid {
+    gap: 20px;
+  }
+
+  .step-card:not(:last-child)::after {
+    right: -20px;
+    width: 20px;
+  }
+}
+
+/* ---------- ≤ 992px: tablet ---------- */
+@media (max-width: 992px) {
+  /* Hero stacks: copy first, product preview below */
+  .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 56px;
+  }
+
+  .hero-copy .lede {
+    max-width: 60ch;
+  }
+
+  .hero-visual {
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  /* Four-up grids become two-up; arrows would point at the wrong card */
+  .steps,
+  .viz-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .step-card:not(:last-child)::after {
+    display: none;
+  }
+}
+
+/* ---------- ≤ 768px: large phone / small tablet ---------- */
+@media (max-width: 768px) {
+  :root {
+    --gutter: 20px;
+    --nav-h: 60px;
+  }
+
+  /* Hamburger navigation */
+  .nav-toggle {
+    display: inline-grid;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 12px var(--gutter) 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    box-shadow: 0 16px 24px -16px rgba(23, 32, 51, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease),
+      visibility 0s linear var(--t-base);
+  }
+
+  .site-header.is-open .nav-links {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  .site-header.is-open {
+    border-bottom-color: var(--border);
+  }
+
+  .nav-link {
+    padding: 12px 14px;
+    font-size: 1rem;
+  }
+
+  .why-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .why-item p {
+    max-width: 52ch;
+  }
+
+  .footer-main {
+    padding-block: 40px 32px;
+  }
+}
+
+/* ---------- ≤ 560px: phone ---------- */
+@media (max-width: 560px) {
+  h1 {
+    font-size: clamp(2rem, 9.6vw, 2.6rem);
+  }
+
+  .hero-grid {
+    gap: 44px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .btn,
+  .cta-actions .btn {
+    width: 100%;
+  }
+
+  .cta-actions {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .steps,
+  .viz-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .step-card,
+  .viz-card-body {
+    padding-inline: 20px;
+  }
+
+  .step-badge {
+    left: 12px;
+  }
+
+  .footer-links {
+    gap: 8px 22px;
+  }
+}
+
+/* ---------- ≤ 380px: small phone ---------- */
+@media (max-width: 380px) {
+  .badge {
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+  }
+
+  .hero-stack li:not(:last-child)::after {
+    margin-inline: 7px;
+  }
+
+  .app-input {
+    font-size: 0.6875rem;
+  }
+}
+
+/* ==========================================================================
+   PLAYGROUND (playground.html)
+   Same breakpoints as above, plus one playground-only step at 680px where the
+   three work panels switch to a single column. The mobile nav is NOT repeated
+   here: the Playground navbar reuses the Home Page rules above
+   (.nav-toggle, .nav-links, .site-header.is-open).
+   ========================================================================== */
+
+/* ---------- ≤ 1200px: tighter three-column workspace ---------- */
+@media (max-width: 1200px) {
+  .container-wide,
+  .nav-inner {
+    padding-inline: 16px;
+  }
+
+  .workspace {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.95fr);
+  }
+}
+
+/* ---------- ≤ 992px: tablet — code + visualization, state below ---------- */
+@media (max-width: 992px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    height: auto;
+  }
+
+  .panel-code,
+  .panel-viz {
+    height: 440px;
+  }
+
+  .panel-state {
+    grid-column: 1 / -1;
+    height: 300px;
+  }
+
+  .input-body {
+    grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
+  }
+}
+
+/* ---------- ≤ 768px: align playground gutters with the nav dropdown ---------- */
+@media (max-width: 768px) {
+  .container-wide,
+  .nav-inner {
+    padding-inline: var(--gutter);
+  }
+
+  /* Theme + GitHub live at the bottom of the dropdown */
+  .nav-actions {
+    margin-left: 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    justify-content: space-between;
+  }
+}
+
+/* ---------- ≤ 680px (playground only): single-column workspace ---------- */
+@media (max-width: 680px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel-code {
+    height: 380px;
+  }
+
+  .panel-viz {
+    height: auto;
+    min-height: 360px;
+  }
+
+  .panel-state {
+    grid-column: auto;
+    height: 320px;
+  }
+
+  .pg-toolbar {
+    padding: 10px;
+  }
+
+  .toolbar-right {
+    width: 100%;
+  }
+
+  .toolbar-right .status {
+    flex: 1 1 100%;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .toolbar-right .btn {
+    flex: 1;
+  }
+
+  .input-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .input-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------- ≤ 560px: phone ---------- */
+@media (max-width: 560px) {
+  .pg-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .input-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .controls-bar {
+    padding: 8px var(--gutter) 10px;
+  }
+
+  .controls-row {
+    gap: 8px;
+  }
+
+  .controls-buttons {
+    width: 100%;
+  }
+
+  .controls-buttons .btn {
+    flex: 1;
+    padding-inline: 8px;
+    min-height: 40px;
+  }
+
+  #playBtn {
+    min-width: 0;
+  }
+
+  .controls-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .cell-value {
+    width: 44px;
+    height: 42px;
+    font-size: 0.9375rem;
+  }
+
+  .array-cell {
+    min-width: 44px;
+  }
+
+  .array-cells {
+    gap: 6px;
+  }
+}
