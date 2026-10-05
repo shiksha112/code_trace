@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CodeTrace — See your code execute, step by step</title>
+  <meta name="description" content="Paste your code, run it, and watch every step: the current line, variable changes, and the arrays, trees and graphs your program builds.">
+  <meta name="theme-color" content="#f8fafc">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <!-- Fonts: Inter (UI) + JetBrains Mono (code). Fallback stacks are defined in global.css. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="home.css">
+  <link rel="stylesheet" href="responsive.css">
+
+  <!-- Apply the saved theme before first paint to avoid a flash. Light is the default. -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+      root.classList.add("js");
+      try {
+        var saved = localStorage.getItem("codetrace-theme");
+        if (saved === "dark" || saved === "light") root.setAttribute("data-theme", saved);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ======================================================================
+       ICON SPRITE — referenced with <svg class="icon"><use href="#i-name"/></svg>
+       ====================================================================== -->
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-logo" viewBox="0 0 28 28">
+        <rect width="28" height="28" rx="8" fill="currentColor"/>
+        <path d="M9.5 9.5 5.5 14l4 4.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M13 14h4" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="21.5" cy="14" r="2.4" fill="#fff"/>
+      </symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></symbol>
+      <symbol id="i-run" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/></symbol>
+      <symbol id="i-braces" viewBox="0 0 24 24"><path d="M8 4C6 4 5 5 5 7v2c0 1.2-.8 2.4-2 3 1.2.6 2 1.8 2 3v2c0 2 1 3 3 3M16 4c2 0 3 1 3 3v2c0 1.2.8 2.4 2 3-1.2.6-2 1.8-2 3v2c0 2-1 3-3 3"/></symbol>
+      <symbol id="i-graph" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="19" r="2.2"/><circle cx="19" cy="19" r="2.2"/><path d="M12 7.2 5.8 16.9M12 7.2l6.2 9.7"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.5" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-prev" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+      <symbol id="i-next" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></symbol>
+      <symbol id="i-bug" viewBox="0 0 24 24"><path d="M8 8a4 4 0 0 1 8 0v6a4 4 0 0 1-8 0zM12 9v11M4 13h4M16 13h4M5 6.5 8 8.5M19 6.5 16 8.5M5 20l3-2.5M19 20l-3-2.5"/></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+      <symbol id="i-rewind" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7.5V12l3 2"/></symbol>
+      <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.79.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- ======================================================================
+       NAVBAR (sticky)
+       Links are relative so the site works from file:// and any subpath.
+       ====================================================================== -->
+  <header class="site-header" data-header>
+    <div class="container">
+      <nav class="navbar" aria-label="Primary">
+        <a class="brand" href="index.html" aria-label="CodeTrace home">
+          <svg class="brand-mark" aria-hidden="true"><use href="#i-logo"/></svg>
+          CodeTrace
+        </a>
+
+        <ul class="nav-links" id="nav-menu" data-nav-menu>
+          <li><a class="nav-link" href="index.html">Home</a></li>
+          <li><a class="nav-link" href="playground.html">Playground</a></li>
+          <li><a class="nav-link" href="examples.html">Examples</a></li>
+          
+        </ul>
+
+        <div class="nav-actions">
+          <!-- TODO: replace with the real repository URL -->
+          <a class="icon-btn" href="https://github.com/" target="_blank" rel="noopener" aria-label="CodeTrace on GitHub (opens in a new tab)">
+            <svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>
+          </a>
+          <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme">
+            <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+            <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+          </button>
+          <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="nav-menu" aria-label="Open menu">
+            <svg class="icon icon-menu" aria-hidden="true"><use href="#i-menu"/></svg>
+            <svg class="icon icon-close" aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-grid hero-grid--single">
+        <div class="hero-copy">
+          <p class="badge">STEP-BY-STEP CODE VISUALIZATION</p>
+          <h1 id="hero-title">
+            <span class="hero-line">See Your Code</span>
+            <span class="hero-line">Actually Execute.</span>
+            <span class="hero-line hero-line--muted">Step by Step.</span>
+          </h1>
+          <p class="lede">Paste your code, run it, and understand exactly what happens at every step.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="playground.html" data-cta="playground">Open Playground <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="btn btn-secondary" href="examples.html">Explore Examples <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW CODETRACE WORKS -->
+    <section class="section" id="how-it-works" aria-labelledby="how-title">
+      <div class="container">
+        <header class="section-head" data-reveal>
+          <h2 id="how-title">How CodeTrace Works</h2>
+          <p class="lede mono how-line">Write → Run → Trace → Understand</p>
+        </header>
+        <ol class="steps steps--five">
+          <li class="step-card" data-reveal>
+            <div class="step-card-top"><span class="icon-tile" aria-hidden="true"><svg class="icon"><use href="#i-code"/></svg></span></div>
+            <h3>Your Code</h3>
+            <p>Paste it into the editor.</p>
+          </li>
+          <li class="step-card" data-reveal>
+            <div class="step-card-top"><span class="icon-tile" aria-hidden="true"><svg class="icon"><use href="#i-run"/></svg></span></div>
+            <h3>Run Program</h3>
+            <p>Execute it with your input.</p>
+          </li>
+          <li class="step-card" data-reveal>
+            <div class="step-card-top"><span class="icon-tile" aria-hidden="true"><svg class="icon"><use href="#i-braces"/></svg></span></div>
+            <h3>Track Execution</h3>
+            <p>Capture every step as it runs.</p>
+          </li>
+          <li class="step-card" data-reveal>
+            <div class="step-card-top"><span class="icon-tile" aria-hidden="true"><svg class="icon"><use href="#i-eye"/></svg></span></div>
+            <h3>See Every Step</h3>
+            <p>Inspect lines, variables, and state.</p>
+          </li>
+          <li class="step-card" data-reveal>
+            <div class="step-card-top"><span class="icon-tile" aria-hidden="true"><svg class="icon"><use href="#i-graph"/></svg></span></div>
+            <h3>Visualize Your Data</h3>
+            <p>Watch arrays, trees, and graphs change.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- PLAYGROUND PREVIEW (visual only; the real workspace is playground.html) -->
+    <section class="section section--tight-top" id="preview" aria-labelledby="preview-title">
+      <div class="container">
+        <header class="section-head" data-reveal>
+          <h2 id="preview-title">Interactive Playground Preview</h2>
+          <p class="lede">Code, execution state, and visualization, side by side.</p>
+        </header>
+        <div class="app-window" data-trace-preview data-reveal>
+          <div class="app-bar">
+            <span class="app-tab mono">binary-search.js</span>
+            <span class="app-input mono"><span class="app-input-label">Input</span> arr = [2, 4, 7, 9, 12], target = 9</span>
+          </div>
+          <div class="trace-host" data-trace-mount data-variant="wide"></div>
+        </div>
+        <div class="preview-cta">
+          <a class="btn btn-primary" href="playground.html" data-cta="playground">Open Playground <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT YOU CAN VISUALIZE -->
+    <section class="section section--tight-top" id="visualize" aria-labelledby="visualize-title">
+      <div class="container">
+        <header class="section-head" data-reveal>
+          <h2 id="visualize-title">What You Can Visualize</h2>
+        </header>
+        <div class="viz-grid">
+<article class="viz-card" data-reveal>
+            <div class="viz-stage" role="img" aria-label="An array of five values: 4, 8, 2, 7, 5, with the value 2 at index 2 marked as current">
+              <div class="array" aria-hidden="true">
+                <div class="cell-wrap"><div class="cell">4</div><div class="cell-index">0</div></div>
+                <div class="cell-wrap"><div class="cell">8</div><div class="cell-index">1</div></div>
+                <div class="cell-wrap">
+                  <div class="cell is-current">2</div><div class="cell-index">2</div>
+                  <div class="cell-marks"><span class="mark mark--mid"><i>↑</i> current</span></div>
+                </div>
+                <div class="cell-wrap"><div class="cell">7</div><div class="cell-index">3</div></div>
+                <div class="cell-wrap"><div class="cell">5</div><div class="cell-index">4</div></div>
+              </div>
+            </div>
+            <div class="viz-card-body">
+              <h3>Arrays</h3>
+              <p>Track indexes, comparisons, swaps, and values.</p>
+            </div>
+          </article>
+<article class="viz-card" data-reveal>
+            <div class="viz-stage">
+              <svg class="viz-svg" viewBox="0 0 220 146" role="img" aria-label="A binary tree: 8 at the root, 4 and 12 below it, and 2 and 6 under 4. Node 4 is highlighted.">
+                <g class="viz-edges">
+                  <line x1="110" y1="24" x2="62" y2="68"/>
+                  <line x1="110" y1="24" x2="158" y2="68"/>
+                  <line x1="62" y1="68" x2="32" y2="116"/>
+                  <line x1="62" y1="68" x2="94" y2="116"/>
+                </g>
+                <g class="viz-nodes">
+                  <g class="viz-node is-visited"><circle cx="110" cy="24" r="16"/><text x="110" y="24">8</text></g>
+                  <g class="viz-node is-active"><circle cx="62" cy="68" r="16"/><text x="62" y="68">4</text></g>
+                  <g class="viz-node"><circle cx="158" cy="68" r="16"/><text x="158" y="68">12</text></g>
+                  <g class="viz-node"><circle cx="32" cy="116" r="16"/><text x="32" y="116">2</text></g>
+                  <g class="viz-node"><circle cx="94" cy="116" r="16"/><text x="94" y="116">6</text></g>
+                </g>
+              </svg>
+            </div>
+            <div class="viz-card-body">
+              <h3>Trees</h3>
+              <p>Follow traversal, recursion, and node relationships.</p>
+            </div>
+          </article>
+<article class="viz-card" data-reveal>
+            <div class="viz-stage">
+              <svg class="viz-svg" viewBox="0 0 220 146" role="img" aria-label="A graph with five nodes: 0 connects to 1 and 2, 1 connects to 3, 2 connects to 4, and 3 connects to 4. Node 0 is visited and node 1 is current.">
+                <g class="viz-edges">
+                  <line x1="110" y1="24" x2="62" y2="68"/>
+                  <line x1="110" y1="24" x2="158" y2="68"/>
+                  <line x1="62" y1="68" x2="62" y2="116"/>
+                  <line x1="158" y1="68" x2="158" y2="116"/>
+                  <line x1="62" y1="116" x2="158" y2="116"/>
+                </g>
+                <g class="viz-nodes">
+                  <g class="viz-node is-visited"><circle cx="110" cy="24" r="16"/><text x="110" y="24">0</text></g>
+                  <g class="viz-node is-active"><circle cx="62" cy="68" r="16"/><text x="62" y="68">1</text></g>
+                  <g class="viz-node"><circle cx="158" cy="68" r="16"/><text x="158" y="68">2</text></g>
+                  <g class="viz-node"><circle cx="62" cy="116" r="16"/><text x="62" y="116">3</text></g>
+                  <g class="viz-node"><circle cx="158" cy="116" r="16"/><text x="158" y="116">4</text></g>
+                </g>
+              </svg>
+            </div>
+            <div class="viz-card-body">
+              <h3>Graphs</h3>
+              <p>Understand traversal, visited nodes, queues, and paths.</p>
+            </div>
+          </article>
+          <article class="viz-card" data-reveal>
+            <div class="viz-stage">
+              <ul class="soon-list" aria-label="Coming soon">
+                <li>Stacks</li><li>Queues</li><li>Linked lists</li>
+              </ul>
+            </div>
+            <div class="viz-card-body">
+              <h3>More Coming Soon</h3>
+              <p>Stacks, queues, linked lists, and more.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="section section--tight-top" aria-labelledby="cta-title">
+      <div class="container">
+        <div class="cta-panel" data-reveal>
+          <h2 id="cta-title">Ready to understand your code?</h2>
+          <p class="lede">See your program execute step by step.</p>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="playground.html" data-cta="playground">Open Playground <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================================
+       FOOTER
+       ====================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-main">
+        <div class="footer-brand">
+          <a class="brand" href="index.html" aria-label="CodeTrace home">
+            <svg class="brand-mark" aria-hidden="true"><use href="#i-logo"/></svg>
+            CodeTrace
+          </a>
+          <p>A visual way to understand code execution.</p>
+        </div>
+
+        <nav aria-label="Footer">
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="playground.html">Playground</a></li>
+            <li><a href="examples.html">Examples</a></li>
+            <li><a href="docs.html">Docs</a></li>
+            <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></li>
+          </ul>
+        </nav>
+      </div>
+      <p class="footer-bottom">© 2026 CodeTrace. Built for learning and understanding.</p>
+    </div>
+  </footer>
+
+  <!-- ======================================================================
+       TEMPLATE: execution preview (cloned by home.js).
+       The same structure will be reused by the Playground page later.
+       ====================================================================== -->
+  <template id="trace-template">
+    <div class="trace" role="group" aria-label="Execution preview of a binary search">
+      <section class="trace-pane trace-pane--code" aria-label="Code">
+        <div class="pane-head"><span class="pane-title">Code</span><span class="pane-meta mono">javascript</span></div>
+        <ol class="code" data-role="code"></ol>
+      </section>
+
+      <section class="trace-pane trace-pane--viz" aria-label="Visualization">
+        <div class="pane-head"><span class="pane-title">Visualization</span><span class="pane-meta mono">arr</span></div>
+        <div class="viz-body">
+          <div class="array" data-role="array"></div>
+          <p class="trace-note" data-role="note"></p>
+        </div>
+      </section>
+
+      <section class="trace-pane trace-pane--state" aria-label="Execution state">
+        <div class="pane-head"><span class="pane-title">Execution state</span></div>
+        <dl class="vars" data-role="vars"></dl>
+      </section>
+
+      <div class="trace-controls">
+        <button class="ctl" type="button" data-role="prev" aria-label="Previous step">
+          <svg class="icon" aria-hidden="true"><use href="#i-prev"/></svg><span class="ctl-label">Previous</span>
+        </button>
+        <button class="ctl ctl--play" type="button" data-role="play" aria-label="Play">
+          <svg class="icon" aria-hidden="true" data-role="play-icon"><use href="#i-play"/></svg><span class="ctl-label" data-role="play-label">Play</span>
+        </button>
+        <button class="ctl" type="button" data-role="next" aria-label="Next step">
+          <span class="ctl-label">Next</span><svg class="icon" aria-hidden="true"><use href="#i-next"/></svg>
+        </button>
+        <input class="scrubber" type="range" min="1" max="12" step="1" value="4" data-role="range" aria-label="Execution step">
+        <span class="step-count mono" data-role="count">Step 4 / 12</span>
+      </div>
+    </div>
+  </template>
+
+  <script src="home.js" defer></script>
+</body>
+</html>
